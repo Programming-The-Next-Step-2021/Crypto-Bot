@@ -1,9 +1,14 @@
+<<<<<<< Updated upstream
 from setuptools import setup
+=======
+import setuptools 
+>>>>>>> Stashed changes
 
 def readme():
     with open('README.md') as f:
         return f.read()
 
+<<<<<<< Updated upstream
 
 # AlexisDaniels:
 setup(name = "crypto-Alexis",
@@ -25,3 +30,16 @@ setup(name = "crypto-Alexis",
         = src
     packages = [packages],
     python_requires = >=3.6
+=======
+# AlexisDaniels:
+setuptools.setup(
+    name = "crypto bot",
+    version = 0.1, 
+    author = Alexis,
+    author_email = alexis_daniels@hotmail.com,
+    description = "A package where you can keep track of your favorite cryptocurrencies and obtain buy/sell suggestion based on sentiment analysis of influencers",
+    license = 'MIT',
+    packages = setuptools.find_packages(),
+    python_requires >=3.6
+
+>>>>>>> Stashed changes
