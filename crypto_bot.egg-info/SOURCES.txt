@@ -1,0 +1,7 @@
+Crypto_bot_pkg/__init__.py
+Crypto_bot_pkg/crypto_selection.py
+Crypto_bot_pkg/setup.py
+crypto_bot.egg-info/PKG-INFO
+crypto_bot.egg-info/SOURCES.txt
+crypto_bot.egg-info/dependency_links.txt
+crypto_bot.egg-info/top_level.txt

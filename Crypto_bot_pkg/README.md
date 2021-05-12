@@ -8,4 +8,4 @@ The program will display the efficacy of the aforementioned algorithm if it woul
 
 TO THE MOON!
 
-branch crypto-selection
+branch crypto-selection trial
