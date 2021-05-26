@@ -4,25 +4,25 @@ import json
 import time
 import matplotlib.pyplot as plt
 
-
 fig = plt.figure()
 ax = fig.add_subplot(111)
 fig.show()
 
 xdata = []
 ydata = []
-
+symbol = "eth"
 
 def update_graph():
     ax.plot(xdata, ydata, color='g')
     ax.legend([f"Last price: {ydata[-1]}$"])
 
     fig.canvas.draw()
+    ax.axes.get_xaxis().set_visible(False)    
     plt.pause(0.1)
 
 
-async def main():
-    url = "wss://stream.binance.com:9443/stream?streams=btcusdt@miniTicker"
+async def main(symbol):
+    url = "wss://stream.binance.com:9443/stream?streams=" + symbol + "usdt@miniTicker"
     async with websockets.connect(url) as client:
         while True:
             data = json.loads(await client.recv())['data']
@@ -40,4 +40,6 @@ async def main():
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(main(symbol))
+
+
