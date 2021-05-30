@@ -1,11 +1,11 @@
 #### This script runs perfectly - for updates, see Final_GUI.py
 #LAST
 
-from tkinter.constants import END
+# from tkinter.constants import END
 from requests import Session
 import json
 import time
-import tkinter as tk
+# import tkinter as tk
 import talib
 import numpy as np
 from numpy import DataSource
@@ -175,110 +175,110 @@ def do_rsi(symbol, prices):
 
 # rsi('btc', 25) #'1d', 2020,4,1,2020,5,1)
 
+run_bot2('btc', 15)
+
+# # ------------------ GUI ---------------------- #
+
+# root = tk.Tk()
 
 
-# ------------------ GUI ---------------------- #
+# #Canvas size
+# canvas = tk.Canvas(root, height = 700, width = 900)
+# canvas.pack()
 
-root = tk.Tk()
+# #Frame for crypto price
+# frame = tk.Frame(root, bg='#80c1ff', bd = 5)
+# frame.place(relx = 0.5, rely = 0.075, relwidth=1, relheight=0.1, anchor = 'n')
 
+# label_coins = tk.Label(root, bg= 'white', font = 10, text = "Bitcoin = btc; Ethereum = eth; Cardano = ada; Dogecoin = doge; Litecoin = ltc")
+# label_coins.place(relx = 0, rely = 0.025, relwidth= 1, relheight= 0.025)
 
-#Canvas size
-canvas = tk.Canvas(root, height = 700, width = 900)
-canvas.pack()
+# entry = tk.Entry(frame, bg='green', font = 20)
+# entry.place(relx = 0.25, relwidth=0.75, relheight=1)
 
-#Frame for crypto price
-frame = tk.Frame(root, bg='#80c1ff', bd = 5)
-frame.place(relx = 0.5, rely = 0.075, relwidth=1, relheight=0.1, anchor = 'n')
+# label = tk.Label(frame, bg= "darkgray", font = 50, text = "Type your cryptocoin here")
+# label.place(relx = 0, relwidth=0.25, relheight=1)
 
-label_coins = tk.Label(root, bg= 'white', font = 10, text = "Bitcoin = btc; Ethereum = eth; Cardano = ada; Dogecoin = doge; Litecoin = ltc")
-label_coins.place(relx = 0, rely = 0.025, relwidth= 1, relheight= 0.025)
+# SOCKET = f"wss://stream.binance.com:9443/ws/{entry.get}t@kline_1m"
 
-entry = tk.Entry(frame, bg='green', font = 20)
-entry.place(relx = 0.25, relwidth=0.75, relheight=1)
+# #Get crypto price and image button
+# button_start = tk.Button(root, text = "Get your live crypto price", command = lambda: [crypto_price(entry.get()), add_image(entry.get())])
+# button_start.place(relx = 0, rely = 0.2,relwidth = 0.2, relheight=0.1)
 
-label = tk.Label(frame, bg= "darkgray", font = 50, text = "Type your cryptocoin here")
-label.place(relx = 0, relwidth=0.25, relheight=1)
+# #Result will be displayed here
+# entry_results = tk.Entry(root)
+# entry_results.place(relx = 0.25, rely = 0.2, relwidth= 0.4, relheight = 0.1)
 
-SOCKET = f"wss://stream.binance.com:9443/ws/{entry.get}t@kline_1m"
+# #Calculates RSI value and suggests decision
+# button_rsi = tk.Button(root, text = "Sell, buy or relax", command = lambda: do_rsi(entry.get(), 16)) #entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
+# button_rsi.place(relx = 0, rely = 0.3,relwidth = 0.2, relheight=0.1)
 
-#Get crypto price and image button
-button_start = tk.Button(root, text = "Get your live crypto price", command = lambda: [crypto_price(entry.get()), add_image(entry.get())])
-button_start.place(relx = 0, rely = 0.2,relwidth = 0.2, relheight=0.1)
+# entry_rsi = tk.Entry(root)
+# entry_rsi.place(relx = 0.25, rely = 0.3, relwidth= 0.4, relheight = 0.1)
 
-#Result will be displayed here
-entry_results = tk.Entry(root)
-entry_results.place(relx = 0.25, rely = 0.2, relwidth= 0.4, relheight = 0.1)
+# photo_frame = tk.Frame(root)
+# photo_frame.place(relx = 0.8, rely = 0.2, relwidth = 0.12, relheight = 0.155)
 
-#Calculates RSI value and suggests decision
-button_rsi = tk.Button(root, text = "Sell, buy or relax", command = lambda: do_rsi(entry.get(), 16)) #entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
-button_rsi.place(relx = 0, rely = 0.3,relwidth = 0.2, relheight=0.1)
+# coin_image = tk.Text(photo_frame)
+# coin_image.place(relwidth = 1, relheight = 1)
 
-entry_rsi = tk.Entry(root)
-entry_rsi.place(relx = 0.25, rely = 0.3, relwidth= 0.4, relheight = 0.1)
+# frame_graph = tk.Frame(root, bg='#80c1ff', bd = 5)
+# frame_graph.place(relx = 0.5, rely = 0.5, relwidth=1, relheight=0.2, anchor = 'n')
 
-photo_frame = tk.Frame(root)
-photo_frame.place(relx = 0.8, rely = 0.2, relwidth = 0.12, relheight = 0.155)
+# #Information for the historical graph
+# label_interval = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Interval")
+# label_interval.place(relx = 0, relwidth=0.15, relheight=1)
 
-coin_image = tk.Text(photo_frame)
-coin_image.place(relwidth = 1, relheight = 1)
+# entry_interval = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_interval.place(relx = 0.15, relwidth= 0.15, relheight = 1)
 
-frame_graph = tk.Frame(root, bg='#80c1ff', bd = 5)
-frame_graph.place(relx = 0.5, rely = 0.5, relwidth=1, relheight=0.2, anchor = 'n')
+# label_startYear = tk.Label(frame_graph, bg= "darkgray", font = 40, text = "Start Year")
+# label_startYear.place(relx = 0.3, rely= 0, relwidth=0.15, relheight=0.5)
 
-#Information for the historical graph
-label_interval = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Interval")
-label_interval.place(relx = 0, relwidth=0.15, relheight=1)
+# entry_startYear = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_startYear.place(relx = 0.45, rely = 0, relwidth= 0.15, relheight = 0.5)
 
-entry_interval = tk.Entry(frame_graph, bg='green', font = 20)
-entry_interval.place(relx = 0.15, relwidth= 0.15, relheight = 1)
+# label_startMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Month")
+# label_startMonth.place(relx = 0.6, rely= 0, relwidth=0.1, relheight=0.5)
 
-label_startYear = tk.Label(frame_graph, bg= "darkgray", font = 40, text = "Start Year")
-label_startYear.place(relx = 0.3, rely= 0, relwidth=0.15, relheight=0.5)
+# entry_startMonth = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_startMonth.place(relx = 0.7, rely = 0, relwidth= 0.1, relheight = 0.5)
 
-entry_startYear = tk.Entry(frame_graph, bg='green', font = 20)
-entry_startYear.place(relx = 0.45, rely = 0, relwidth= 0.15, relheight = 0.5)
+# label_startDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Day")
+# label_startDay.place(relx = 0.8, rely= 0, relwidth=0.1, relheight=0.5)
 
-label_startMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Month")
-label_startMonth.place(relx = 0.6, rely= 0, relwidth=0.1, relheight=0.5)
+# entry_startDay = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_startDay.place(relx = 0.9, rely = 0, relwidth= 0.1, relheight = 0.5)
 
-entry_startMonth = tk.Entry(frame_graph, bg='green', font = 20)
-entry_startMonth.place(relx = 0.7, rely = 0, relwidth= 0.1, relheight = 0.5)
+# label_endYear = tk.Label(frame_graph, bg= "darkgray", font = 70, text = "End Year")
+# label_endYear.place(relx = 0.3, rely= 0.5, relwidth=0.15, relheight=0.5)
 
-label_startDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Day")
-label_startDay.place(relx = 0.8, rely= 0, relwidth=0.1, relheight=0.5)
+# entry_endYear = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_endYear.place(relx = 0.45, rely = 0.5, relwidth= 0.15, relheight = 0.5)
 
-entry_startDay = tk.Entry(frame_graph, bg='green', font = 20)
-entry_startDay.place(relx = 0.9, rely = 0, relwidth= 0.1, relheight = 0.5)
+# label_endMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Month")
+# label_endMonth.place(relx = 0.6, rely= 0.5, relwidth=0.1, relheight=0.5)
 
-label_endYear = tk.Label(frame_graph, bg= "darkgray", font = 70, text = "End Year")
-label_endYear.place(relx = 0.3, rely= 0.5, relwidth=0.15, relheight=0.5)
+# entry_endMonth = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_endMonth.place(relx = 0.7, rely = 0.5, relwidth= 0.1, relheight = 0.5)
 
-entry_endYear = tk.Entry(frame_graph, bg='green', font = 20)
-entry_endYear.place(relx = 0.45, rely = 0.5, relwidth= 0.15, relheight = 0.5)
+# label_endDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Day")
+# label_endDay.place(relx = 0.8, rely= 0.5, relwidth=0.1, relheight=0.5)
 
-label_endMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Month")
-label_endMonth.place(relx = 0.6, rely= 0.5, relwidth=0.1, relheight=0.5)
+# entry_endDay = tk.Entry(frame_graph, bg='green', font = 20)
+# entry_endDay.place(relx = 0.9, rely = 0.5, relwidth= 0.1, relheight = 0.5)
 
-entry_endMonth = tk.Entry(frame_graph, bg='green', font = 20)
-entry_endMonth.place(relx = 0.7, rely = 0.5, relwidth= 0.1, relheight = 0.5)
-
-label_endDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Day")
-label_endDay.place(relx = 0.8, rely= 0.5, relwidth=0.1, relheight=0.5)
-
-entry_endDay = tk.Entry(frame_graph, bg='green', font = 20)
-entry_endDay.place(relx = 0.9, rely = 0.5, relwidth= 0.1, relheight = 0.5)
-
-#Information about possible intervals and limit values
-label_info = tk.Label(root, bg= 'white', font = 10, text = "Available intervals: 1m, 3m, 5m, 15m, 1h, 2h, 3h, 4h, 8h, 12h, 1d, 3d, 1w, 1M")
-label_info.place(relx = 0, rely = 0.7, relwidth= 1, relheight= 0.05)
-label_info2 = tk.Label(root, bg= 'white', font = 10, text = "Maximum ammount of historical timepoints is 1000")
-label_info2.place(relx = 0, rely = 0.75, relwidth= 1, relheight= 0.05)
+# #Information about possible intervals and limit values
+# label_info = tk.Label(root, bg= 'white', font = 10, text = "Available intervals: 1m, 3m, 5m, 15m, 1h, 2h, 3h, 4h, 8h, 12h, 1d, 3d, 1w, 1M")
+# label_info.place(relx = 0, rely = 0.7, relwidth= 1, relheight= 0.05)
+# label_info2 = tk.Label(root, bg= 'white', font = 10, text = "Maximum ammount of historical timepoints is 1000")
+# label_info2.place(relx = 0, rely = 0.75, relwidth= 1, relheight= 0.05)
      
-button_history = tk.Button(root, text = "See Historical Graph", command = lambda: historical(entry.get(), entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
-button_history.place(rely = 0.8, relwidth = 1, relheight = 0.1)
+# button_history = tk.Button(root, text = "See Historical Graph", command = lambda: historical(entry.get(), entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
+# button_history.place(rely = 0.8, relwidth = 1, relheight = 0.1)
 
-#Exit the GUI
-button_stop = tk.Button(root, text = "Stop", command = root.quit)
-button_stop.place(relx = 0.5, rely = 0.9, relwidth = 0.5, relheight = 0.1, anchor = 'n')
+# #Exit the GUI
+# button_stop = tk.Button(root, text = "Stop", command = root.quit)
+# button_stop.place(relx = 0.5, rely = 0.9, relwidth = 0.5, relheight = 0.1, anchor = 'n')
 
-root.mainloop()
+# root.mainloop()
