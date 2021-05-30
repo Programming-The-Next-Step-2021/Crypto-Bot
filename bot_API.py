@@ -1,42 +1,33 @@
 #### This script runs perfectly - for updates, see Final_GUI.py
 
-# import bot_API
-# from bot_API import bot_api
-# from bot_API import stop
-# import bot2
-# from bot2 import update_graph
-# from bot2 import main
-
-import os
-import sys
 from tkinter.constants import END
-from tkinter.constants import CENTER
-from requests import Request, Session
+from requests import Session
 import json
-import pprint
-import sched, time
+import time
 import tkinter as tk
-from twisted.internet import task, reactor
-from requests.api import head
+import talib
+import numpy as np
 from numpy import DataSource
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import requests
-from PIL import Image
-from PIL import ImageTk
-import bot
-from bot import run
-from bot import select_crypto
-from bot import get_results
-from bot import update_graph
 import websockets
 import asyncio
 
 
 
 # ---------------- FUNCTIONS --------------------- #
+RSI_PERIOD = 14
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD = 30
+# TRADE_SYMBOL = 'BTCUSD'
+# TRADE_QUANTITY = 0.05
+
+results = []
+xdata = []
+ydata = []
+
 url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
 
 coin = 'litecoin'
@@ -44,7 +35,7 @@ def bot_api(coin):
     global data
 
     parameters = {
-        'slug': coin,
+        'symbol': coin,
         'convert': "usd"
     }
 
@@ -61,12 +52,9 @@ def bot_api(coin):
     result = json.loads(response.text)['data']
     result = list(result)
     number = result[0]
-    # print(result)
-    # print(number)
 
     result = json.loads(response.text)['data'][str(number)]['quote']['USD']['price']
 
-    # time.sleep(60)
     return(result)
 
 #Get the result printed in the entrybox
@@ -75,18 +63,8 @@ def crypto_price(coin):
     entry_results.delete(0, END)
     entry_results.insert(0, str(result))
 
-
-#Run the loop every 60 seconds (it freezes all other processes)
-def run_button(coin):
-    while True:
-        sleep(60 - time() % 60)
-        bot_api(coin)
-
 def quit(self):
        root.destroy 
-
-def bot2():
-    os.system('python3 bot2.py')
 
 def add_image(coin):
     global my_image
@@ -95,57 +73,51 @@ def add_image(coin):
     index = '.png'
     final_coin =  coin_path + coin + index
     filepath = final_coin
-    my_image = tk.PhotoImage(file=filepath)
-    coin_image.delete('1.0', END)
-    coin_image.image_create(END, image = my_image)
+    if coin == 'eth' or coin == 'btc' or coin == 'doge' or coin == 'ada' or coin == 'ltc':
+        my_image = tk.PhotoImage(file=filepath)
+        coin_image.delete('1.0', END)
+        coin_image.image_create(END, image = my_image)
+    else:
+        my_image = tk.PhotoImage(file='logos/white.png')
+        coin_image.delete('1.0', END)
+        coin_image.image_create(END, image = my_image)
 
-def show_plot():
-    global ax
-    global fig
+async def main(symbol, prices):
+    global xdata
+    global results
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    fig.show()
-
-def update_graph():
-    ax.plot(xdata, ydata, color='g')
-    ax.legend([f"Last price: {ydata[-1]}$"])
-
-    fig.canvas.draw()
-    ax.axes.get_xaxis().set_visible(False)    
-    plt.pause(0.1)
-
-async def main(symbol):
     url = "wss://stream.binance.com:9443/stream?streams=" + symbol + "usdt@miniTicker"
     async with websockets.connect(url) as client:
-        while True:
+        global xdata
+        for x in range(prices):
+        # while len(xdata) < prices:
             data = json.loads(await client.recv())['data']
 
             event_time = time.localtime(data['E'] // 1000)
             event_time = f"{event_time.tm_hour}:{event_time.tm_min}:{event_time.tm_sec}"
 
             print(event_time, data['c'])
+            a = data['c']
+            results.append(a)
 
-            xdata.append(event_time)
-            ydata.append(int(float(data['c'])))
+            print(x)
+        return(results)
 
-            update_graph()
-
-def run_bot2(symbol):
+def run_bot2(symbol, prices):
     if __name__ == '__main__':
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(symbol))
+        loop.run_until_complete(main(symbol, prices))
+        return(results)
 
 
-def historical(symbol, interval, start, end):
+def historical(symbol, interval, startYear, startMonth, startDay, endYear, endMonth, endDay):
     global df
 
     url = 'https://api.binance.com/api/v3/klines'
 
     symbol = symbol.upper()
-
-    startTime = str(int(dt.datetime(2020,start,1).timestamp() * 1000))
-    endTime = str(int(dt.datetime(2020,end,1).timestamp() * 1000))
+    startTime = str(int(dt.datetime(startYear,startMonth,startDay).timestamp() * 1000))
+    endTime = str(int(dt.datetime(endYear,endMonth,endDay).timestamp() * 1000))
     limit = '1000'
 
     req_params = {'symbol': symbol + 'USDT', 'interval': interval, 'startTime': startTime, 
@@ -158,47 +130,67 @@ def historical(symbol, interval, start, end):
     df.columns =  ['datetime', 'open', 'high', 'low', 'close', 'volume']
 
     df.index = [dt.datetime.fromtimestamp(x / 1000.0) for x in df.datetime]
-    # del df['datetime']
-    # print(df.head())
-    # print(df['close'])
     df['close'] = df['close'].astype(float)
     df['close'].plot()
     plt.show()
     return df
 
+def rsi(symbol, prices):
+    df = run_bot2(symbol, prices)
+    print(df)
+    df = np.array(df, dtype='f8')
+
+    #Buy or sell, depending on the RSI value
+    rsi = talib.RSI(df, RSI_PERIOD)
+    # print(rsi)
+    last_rsi = rsi[-1]
+    print(last_rsi)
+    if last_rsi > RSI_OVERBOUGHT:
+        decision = "BEARISH: SELL YOUR CRYPTO NOW"
+        # if in_position:
+        #     print("Bearish: But, you can't sell what you don't have")
+        #     # Binance selling order
+
+    if last_rsi < RSI_OVERSOLD:
+        decision = "BULLISH: BUUUUY, TO THE MOON"
+        # if in_position:
+        #     print("Bullish: You have some already, move on")
+        #     # Binance buying order
+
+    if last_rsi > RSI_OVERSOLD and last_rsi < RSI_OVERBOUGHT:
+        decision = "RELAX AND DO NOTHING"
+    print(decision)
+
+    last_rsi = round(last_rsi, 2)
+    return(last_rsi, decision)
+
+def do_rsi(symbol, prices): 
+    result = rsi(symbol, prices) 
+    entry_rsi.delete(0, END)
+    rsi_value = result[0]
+    decision = result[1]
+    entry_rsi.insert(0, ('RSI value: {}, {}').format(rsi_value, decision))
 
 
-
+# rsi('btc', 25) #'1d', 2020,4,1,2020,5,1)
 
 
 
 # ------------------ GUI ---------------------- #
 
-
-timeout = 60.00
-xdata = []
-ydata = []
-
-##TO DO:
-
-#run_forever runs literally forever and can't be stopped from the GUI
-#Show historical data from a certain crypto
-#Connect to API's
-
 root = tk.Tk()
 
 
-# global data 
+#Canvas size
 canvas = tk.Canvas(root, height = 700, width = 900)
 canvas.pack()
 
-# background_image = Image.open('background_image.png')
-# background_image = ImageTk.PhotoImage(background_image)
-# background_label = tk.Label(root, image=background_image)
-# background_label.place(relwidth = 1, relheight = 1)
-
+#Frame for crypto price
 frame = tk.Frame(root, bg='#80c1ff', bd = 5)
 frame.place(relx = 0.5, rely = 0.075, relwidth=1, relheight=0.1, anchor = 'n')
+
+label_coins = tk.Label(root, bg= 'white', font = 10, text = "Bitcoin = btc; Ethereum = eth; Cardano = ada; Dogecoin = doge; Litecoin = ltc")
+label_coins.place(relx = 0, rely = 0.025, relwidth= 1, relheight= 0.025)
 
 entry = tk.Entry(frame, bg='green', font = 20)
 entry.place(relx = 0.25, relwidth=0.75, relheight=1)
@@ -208,63 +200,84 @@ label.place(relx = 0, relwidth=0.25, relheight=1)
 
 SOCKET = f"wss://stream.binance.com:9443/ws/{entry.get}t@kline_1m"
 
-# button_start = tk.Button(root, text = "Get your crypto price", command = lambda: bot.run(entry.get()))
+#Get crypto price and image button
 button_start = tk.Button(root, text = "Get your live crypto price", command = lambda: [crypto_price(entry.get()), add_image(entry.get())])
-button_start.place(relx = 0, rely = 0.2,relwidth = 0.25, relheight=0.1)
+button_start.place(relx = 0, rely = 0.2,relwidth = 0.2, relheight=0.1)
 
+#Result will be displayed here
 entry_results = tk.Entry(root)
-entry_results.place(relx = 0.25, rely = 0.2, relwidth= 0.5, relheight = 0.1)
+entry_results.place(relx = 0.25, rely = 0.2, relwidth= 0.4, relheight = 0.1)
+
+#Calculates RSI value and suggests decision
+button_rsi = tk.Button(root, text = "Sell, buy or relax", command = lambda: do_rsi(entry.get(), 16)) #entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
+button_rsi.place(relx = 0, rely = 0.3,relwidth = 0.2, relheight=0.1)
+
+entry_rsi = tk.Entry(root)
+entry_rsi.place(relx = 0.25, rely = 0.3, relwidth= 0.4, relheight = 0.1)
 
 photo_frame = tk.Frame(root)
 photo_frame.place(relx = 0.8, rely = 0.2, relwidth = 0.12, relheight = 0.155)
 
-# photo = tk.PhotoImage(file = "logos/ethereum.gif")
 coin_image = tk.Text(photo_frame)
 coin_image.place(relwidth = 1, relheight = 1)
 
+frame_graph = tk.Frame(root, bg='#80c1ff', bd = 5)
+frame_graph.place(relx = 0.5, rely = 0.5, relwidth=1, relheight=0.2, anchor = 'n')
+
+#Information for the historical graph
+label_interval = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Interval")
+label_interval.place(relx = 0, relwidth=0.15, relheight=1)
+
+entry_interval = tk.Entry(frame_graph, bg='green', font = 20)
+entry_interval.place(relx = 0.15, relwidth= 0.15, relheight = 1)
+
+label_startYear = tk.Label(frame_graph, bg= "darkgray", font = 40, text = "Start Year")
+label_startYear.place(relx = 0.3, rely= 0, relwidth=0.15, relheight=0.5)
+
+entry_startYear = tk.Entry(frame_graph, bg='green', font = 20)
+entry_startYear.place(relx = 0.45, rely = 0, relwidth= 0.15, relheight = 0.5)
+
+label_startMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Month")
+label_startMonth.place(relx = 0.6, rely= 0, relwidth=0.1, relheight=0.5)
+
+entry_startMonth = tk.Entry(frame_graph, bg='green', font = 20)
+entry_startMonth.place(relx = 0.7, rely = 0, relwidth= 0.1, relheight = 0.5)
+
+label_startDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Start Day")
+label_startDay.place(relx = 0.8, rely= 0, relwidth=0.1, relheight=0.5)
+
+entry_startDay = tk.Entry(frame_graph, bg='green', font = 20)
+entry_startDay.place(relx = 0.9, rely = 0, relwidth= 0.1, relheight = 0.5)
+
+label_endYear = tk.Label(frame_graph, bg= "darkgray", font = 70, text = "End Year")
+label_endYear.place(relx = 0.3, rely= 0.5, relwidth=0.15, relheight=0.5)
+
+entry_endYear = tk.Entry(frame_graph, bg='green', font = 20)
+entry_endYear.place(relx = 0.45, rely = 0.5, relwidth= 0.15, relheight = 0.5)
+
+label_endMonth = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Month")
+label_endMonth.place(relx = 0.6, rely= 0.5, relwidth=0.1, relheight=0.5)
+
+entry_endMonth = tk.Entry(frame_graph, bg='green', font = 20)
+entry_endMonth.place(relx = 0.7, rely = 0.5, relwidth= 0.1, relheight = 0.5)
+
+label_endDay = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "End Day")
+label_endDay.place(relx = 0.8, rely= 0.5, relwidth=0.1, relheight=0.5)
+
+entry_endDay = tk.Entry(frame_graph, bg='green', font = 20)
+entry_endDay.place(relx = 0.9, rely = 0.5, relwidth= 0.1, relheight = 0.5)
+
+#Information about possible intervals and limit values
+label_info = tk.Label(root, bg= 'white', font = 10, text = "Available intervals: 1m, 3m, 5m, 15m, 1h, 2h, 3h, 4h, 8h, 12h, 1d, 3d, 1w, 1M")
+label_info.place(relx = 0, rely = 0.7, relwidth= 1, relheight= 0.05)
+label_info2 = tk.Label(root, bg= 'white', font = 10, text = "Maximum ammount of historical timepoints is 1000")
+label_info2.place(relx = 0, rely = 0.75, relwidth= 1, relheight= 0.05)
+     
+button_history = tk.Button(root, text = "See Historical Graph", command = lambda: historical(entry.get(), entry_interval.get(), int(entry_startYear.get()), int(entry_startMonth.get()), int(entry_startDay.get()), int(entry_endYear.get()), int(entry_endMonth.get()), int(entry_endDay.get())))
+button_history.place(rely = 0.8, relwidth = 1, relheight = 0.1)
+
+#Exit the GUI
 button_stop = tk.Button(root, text = "Stop", command = root.quit)
 button_stop.place(relx = 0.5, rely = 0.9, relwidth = 0.5, relheight = 0.1, anchor = 'n')
 
-frame_graph = tk.Frame(root, bg='#80c1ff', bd = 5)
-frame_graph.place(relx = 0.5, rely = 0.4, relwidth=1, relheight=0.2, anchor = 'n')
-
-label_graph = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Type your crypto symbol here")
-label_graph.place(relx = 0, relwidth=0.25, relheight=0.5)
-
-entry_graph = tk.Entry(frame_graph, bg='green', font = 20)
-entry_graph.place(relx = 0.25, relwidth= 0.25, relheight = 0.5)
-
-label_interval = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Type your interval here")
-label_interval.place(relx = 0, rely= 0.5, relwidth=0.25, relheight=0.5)
-
-entry_interval = tk.Entry(frame_graph, bg='green', font = 20)
-entry_interval.place(relx = 0.25, rely = 0.5, relwidth= 0.25, relheight = 0.5)
-
-label_start = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Type your start date here")
-label_start.place(relx = 0.5, rely= 0, relwidth=0.25, relheight=0.5)
-
-entry_start = tk.Entry(frame_graph, bg='green', font = 20)
-entry_start.place(relx = 0.75, rely = 0, relwidth= 0.25, relheight = 0.5)
-
-label_end = tk.Label(frame_graph, bg= "darkgray", font = 50, text = "Type your end date here")
-label_end.place(relx = 0.5, rely= 0.5, relwidth=0.25, relheight=0.5)
-
-entry_end = tk.Entry(frame_graph, bg='green', font = 20)
-entry_end.place(relx = 0.75, rely = 0.5, relwidth= 0.25, relheight = 0.5)
-
-
-button_graph = tk.Button(root, text = "See Live Graph", command = lambda: [show_plot(), run_bot2(entry_graph.get())])
-button_graph.place(relx = 0.25, rely = 0.75, relwidth = 0.5, relheight = 0.1, anchor = 'n')
-        
-button_history = tk.Button(root, text = "See Historical Graph", command = lambda: historical(entry_graph.get(), entry_interval.get(), int(entry_start.get()), int(entry_end.get())))
-button_history.place(relx = 0.75, rely = 0.75, relwidth = 0.5, relheight = 0.1, anchor = 'n')
-        
-
-# label = tk.Label(frame2, bg= "darkgray", font = 50, text = "Closing values should appear here")
-# label.place(rely= 0.25, relwidth=1, relheight=0.2)
-
 root.mainloop()
-
-    # interval = '1h'
-    # startTime = dt.datetime(2020,1,1)
-    # endTime = dt.datetime(2020,2,1)
