@@ -277,10 +277,6 @@ def do_rsi(symbol, prices):
     entry_rsi.insert(0, ('RSI value: {}, {}').format(rsi_value, decision))
 
 
-# rsi('btc', 15) #'1d', 2020,4,1,2020,5,1)
-
-
-
 # ------------------ GUI ---------------------- #
 
 root = tk.Tk()

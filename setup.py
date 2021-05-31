@@ -19,5 +19,6 @@ setuptools.setup(
         'asyncio',
         'TA-Lib',
         'tkinter'
-    ]
-    )
+    ],
+)
+
