@@ -33,6 +33,9 @@ url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
 
 coin = 'litecoin'
 def bot_api(coin):
+    """
+
+    """
     global data
 
     parameters = {
@@ -84,6 +87,9 @@ def add_image(coin):
         coin_image.image_create(END, image = my_image)
 
 async def main(symbol, prices):
+    """
+
+    """
     global xdata
     global results
 
@@ -105,6 +111,9 @@ async def main(symbol, prices):
         return(results)
 
 def run_bot2(symbol, prices):
+    """
+
+    """
     if __name__ == '__main__':
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(symbol, prices))
@@ -112,6 +121,9 @@ def run_bot2(symbol, prices):
 
 
 def historical(symbol, interval, startYear, startMonth, startDay, endYear, endMonth, endDay):
+    """
+
+    """
     global df
 
     url = 'https://api.binance.com/api/v3/klines'
@@ -137,6 +149,9 @@ def historical(symbol, interval, startYear, startMonth, startDay, endYear, endMo
     return df
 
 def rsi(symbol, prices):
+    """
+
+    """
     df = run_bot2(symbol, prices)
     print(df)
     df = np.array(df, dtype='f8')
