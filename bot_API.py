@@ -34,6 +34,20 @@ url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
 coin = 'litecoin'
 def bot_api(coin):
     """
+    A function that retrieves the latest price of the selected cryptocurrency from the API 
+    of coinmarketcap.
+
+    If an unexistent symbol is computed, no value is retrieved
+
+    Properties
+    -----------
+    coin : str
+        the symbol of a cryptocurrency
+
+    Returns
+    --------
+    str
+        A string with the latest value of the specified cryptocurrency
 
     """
     global data
@@ -87,9 +101,7 @@ def add_image(coin):
         coin_image.image_create(END, image = my_image)
 
 async def main(symbol, prices):
-    """
 
-    """
     global xdata
     global results
 
@@ -112,8 +124,31 @@ async def main(symbol, prices):
 
 def run_bot2(symbol, prices):
     """
+    This function can obtain real-live prices of cryptos every second.
 
+    This function contains the asynchronous function main(), which uses the
+    Binance websocket in order to retrieve the latest cryptocurrency from
+    its platform each second. With this, a loop is set to run 15 times (enough 
+    values to calculate the RSI of 14 timepoints). The results from the 15 
+    values are stored within the 'results' object.
+    It is important to note that, while the values are being calculated, it 
+    is not possible to use anything else from the GUI.
+
+    If an unexistent symbol is specified, no value is retrieved.
+
+    Properties
+    -----------
+    symbol : str
+        the symbol of a cryptocurrency
+    prices : int 
+        The ammount of prices you want to retrieve
+
+    Returns
+    -------
+    list
+        A list with the ammount of cryptocurrency values specified
     """
+    
     if __name__ == '__main__':
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(symbol, prices))
@@ -122,8 +157,38 @@ def run_bot2(symbol, prices):
 
 def historical(symbol, interval, startYear, startMonth, startDay, endYear, endMonth, endDay):
     """
+    This function can retrieve historical data of any crypto in a graph
 
+    It connect with the API from Binance and it appends the closing candlestick
+    values of the crypto, with a specified interval.
+
+    Properties
+    ----------
+    symbol : str
+        A cryptocurrency symbol
+    interval : str
+        Interval of closing candlesticks
+    startYear : str
+        The year of the starting date
+    startMonth : str
+        The month of the starting date
+    startDay : str
+        The day of the starting date
+    endYear : str
+        The year for the ending date
+    endMonth : str
+        The month for the ending date
+    endDay : str
+        The day for the ending date
+
+    Returns
+    --------
+    dataframe
+        A dataframe with all the values that appear in the graph
+    plot
+        A graph with the crpto values (x_axis = date, y_axis = price)
     """
+
     global df
 
     url = 'https://api.binance.com/api/v3/klines'
@@ -150,8 +215,31 @@ def historical(symbol, interval, startYear, startMonth, startDay, endYear, endMo
 
 def rsi(symbol, prices):
     """
+    This function calculate the Relative Strength Index (RSI) from live crypto
+    prices
 
+    It uses the run_bot2 function to communicate with the websocket from 
+    Binance, and after 15 values have been obtained, it calculates the RSI,
+    and it displays a message with a suggestion to buy/sell/retain:
+    - If RSI > 70 = Market is bearish/overbought, you should sell now
+    - If 30 < RSI > 70 = Market is stable, you should not do anything
+    - If RSI < 30 = Market is bullish/oversold, you should buy now  
+
+    Properties
+    ----------
+    symbol : str
+        a crypto symbol
+    prices : int
+        (optional) it is set to 15 as default
+
+    Returns
+    -------
+    float
+        The RSI value
+    str
+        The buying/selling/retaining decision
     """
+
     df = run_bot2(symbol, prices)
     print(df)
     df = np.array(df, dtype='f8')
