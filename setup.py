@@ -18,6 +18,6 @@ setuptools.setup(
         'websockets',
         'asyncio',
         'TA-Lib',
-        'tkinter',
+        'tkinter'
     ]
     )
