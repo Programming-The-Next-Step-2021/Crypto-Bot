@@ -1,4 +1,3 @@
-#### This script runs perfectly - for updates, see Final_GUI.py
 #LAST
 
 from tkinter.constants import END
@@ -50,6 +49,7 @@ def bot_api(coin):
         A string with the latest value of the specified cryptocurrency
 
     """
+
     global data
 
     parameters = {
@@ -148,7 +148,7 @@ def run_bot2(symbol, prices):
     list
         A list with the ammount of cryptocurrency values specified
     """
-    
+
     if __name__ == '__main__':
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(symbol, prices))
